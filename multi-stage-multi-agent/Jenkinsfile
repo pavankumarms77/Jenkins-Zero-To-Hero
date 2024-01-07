@@ -1,21 +1,34 @@
 pipeline {
-  agent none
-  stages {
-    stage('Back-end') {
-      agent {
-        docker { image 'maven:3.8.1-adoptopenjdk-11' }
-      }
-      steps {
-        sh 'mvn --version'
-      }
+    agent {
+        docker {
+            image 'maven:3-alpine' // Use a Maven image as an example
+        }
     }
-    stage('Front-end') {
-      agent {
-        docker { image 'node:16-alpine' }
-      }
-      steps {
-        sh 'node --version'
-      }
+    stages {
+        stage('Checkout') {
+            steps {
+                // Checkout your source code from version control (e.g., Git)
+                checkout scm
+            }
+        }
+        stage('Create HelloWorld.java') {
+            steps {
+                script {
+                    writeFile file: 'src/main/java/HelloWorld.java', text: '''
+                        public class HelloWorld {
+                            public static void main(String[] args) {
+                                System.out.println("Hello, World!");
+                            }
+                        }
+                    '''
+                }
+            }
+        }
+        stage('Build') {
+            steps {
+                // Build your Java project using Maven
+                sh 'mvn clean install'
+            }
+        }
     }
-  }
 }
